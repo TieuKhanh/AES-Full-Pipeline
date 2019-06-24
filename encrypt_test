@@ -1,0 +1,110 @@
+--- AES temporary testbench---
+--- Test Key expansion
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+library STD;
+use IEEE.std_logic_textio.all;
+use STD.textio.all;
+
+entity encrypt_test is
+end entity;
+
+--------------------------
+
+architecture testbench of encrypt_test is
+
+signal clk_t : std_logic := '0';
+signal en_t : std_logic := '0';
+signal reset_t : std_logic := '1'; -- reset positive level 
+-- hexa number
+signal key_t : std_logic_vector(127 downto 0) := X"00000000000000000000000000000000";
+signal text_t : std_logic_vector(127 downto 0):= X"f34481ec3cc627bacd5dc3fb08f273e6";
+signal cipher_t : std_logic_vector(127 downto 0);
+signal cnt : std_logic_vector(3 downto 0) := "0000";
+signal done : std_logic;
+component ENCRYPTION is 
+	port(
+		CLK : in std_logic;
+		RESET : in std_logic;
+		EN : in std_logic;
+		KEY : in std_logic_vector(127 downto 0);
+		PLAINTEXT : in std_logic_vector(127 downto 0);
+		DONE : out std_logic;
+		CIPHERTEXT : out std_logic_vector(127 downto 0)
+	); 
+end component;
+
+
+Begin
+--create clock
+
+create_clock: process
+begin 
+	wait for 12 ns;
+	clk_t <= not clk_t after 50 ns;
+end process create_clock;
+
+-- create en signal for key expansion
+create_en: process
+begin 
+	wait for 20 ns;
+	en_t <= '1';
+end process create_en;
+
+-- create reset signal 
+create_rst: process
+begin
+	wait for 100 ns;
+	reset_t <= '0';
+end process create_rst;
+
+
+-- DUT 
+dut: component ENCRYPTION port map (clk_t, reset_t, en_t, key_t, text_t, done, cipher_t);
+--dut: component ROUND_KEY0 port map (clk_t, reset_t , key_t, key_tr0);
+cl: process(reset_t, clk_t)
+begin
+	if reset_t = '1' then
+		cnt <= (others => '0');
+	elsif clk_t = '1' and clk_t'event then
+		cnt <= cnt + '0';
+	end if;
+end process;
+
+
+
+-- Print results-------------------------------------------------
+test: process(cnt)
+file file_pointer : text; --is out "Output_result.txt";
+variable info: line;
+variable test_cnt: integer :=0;
+begin
+-- open file --
+	if(cnt = "1011") then
+		file_open(file_pointer,"C:\\Users\\TieuKhanh\\Documents\\VLSI Project\\AES\\Test_Data\\encrypt_raw", write_mode); 
+		write(info, cipher_t);
+		writeline(file_pointer, info);
+
+    ----- input generator-----
+    --test_cnt := test_cnt + 1;
+    --assert test_cnt < 1024
+		report "end simulation" severity NOTE;
+--	 if test_cnt <256 then
+--		file_close(file_RESULTS);
+	end if; 
+
+ 
+end process test;
+end architecture;
+
+
+
+
+
+
+
+

@@ -1,0 +1,120 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ENCRYPTION is 
+	port(
+		CLK : in std_logic;
+		RESET : in std_logic;
+		EN : in std_logic;
+		KEY : in std_logic_vector(127 downto 0);
+		PLAINTEXT : in std_logic_vector(127 downto 0);
+		DONE : out std_logic;
+		CIPHERTEXT : out std_logic_vector(127 downto 0)
+	); 
+end entity;
+
+architecture RTL of ENCRYPTION is
+
+signal d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10: std_logic_vector(127 downto 0);
+signal rdkey0, rdkey1, rdkey2, rdkey3, rdkey4, rdkey5, rdkey6, rdkey7, rdkey8, rdkey9: std_logic_vector(127 downto 0);
+signal count : std_logic_vector(5 downto 0) := "000000";
+
+
+-------- Component --------------
+
+component ROUND is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Round_key : in std_logic_vector(127 downto 0);
+		Dout_round: out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component LAST_ROUND is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Round_key : in std_logic_vector(127 downto 0);
+		Dout_round: out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component KEY_EXPANSION is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		key_r0 : out std_logic_vector(127 downto 0);
+		key_r1 : out std_logic_vector(127 downto 0);
+		key_r2 : out std_logic_vector(127 downto 0);
+		key_r3 : out std_logic_vector(127 downto 0);
+		key_r4 : out std_logic_vector(127 downto 0);
+		key_r5 : out std_logic_vector(127 downto 0);
+		key_r6 : out std_logic_vector(127 downto 0);
+		key_r7 : out std_logic_vector(127 downto 0);
+		key_r8 : out std_logic_vector(127 downto 0);
+		key_r9 : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+
+component ADD_KEY is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		key : in std_logic_vector(127 downto 0);
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+
+Begin
+	Addkey: component ADD_KEY port map(CLK, RESET, EN, KEY, PLAINTEXT, d0);
+	Round0: component ROUND port map (CLK, RESET, EN, d0, rdkey0, d1);
+	Round1: component ROUND port map (CLK, RESET, EN, d1, rdkey1, d2);
+	Round2: component ROUND port map (CLK, RESET, EN, d2, rdkey2, d3);
+	Round3: component ROUND port map (CLK, RESET, EN, d3, rdkey3, d4);
+	Round4: component ROUND port map (CLK, RESET, EN, d4, rdkey4, d5);
+	Round5: component ROUND port map (CLK, RESET, EN, d5, rdkey5, d6);
+	Round6: component ROUND port map (CLK, RESET, EN, d6, rdkey6, d7);
+	Round7: component ROUND port map (CLK, RESET, EN, d7, rdkey7, d8);
+	Round8: component ROUND port map (CLK, RESET, EN, d8, rdkey8, d9);
+	Round10: component LAST_ROUND port map (CLK, RESET, EN, d9, rdkey9, d10);
+	KeyExpand: component KEY_EXPANSION port map(
+	CLK, RESET, EN, KEY, rdkey0, rdkey1, rdkey2, rdkey3, rdkey4, 
+	rdkey5, rdkey6, rdkey7, rdkey8, rdkey9
+	);
+	
+	c: process(clk, reset, en)
+	begin	
+		if reset = '1' then
+			count <= (others => '0');
+		elsif clk = '1' and clk'event then 
+			if en = '1' then
+				count <= count + '1';
+			end if;
+		end if;
+	end process;
+	
+	d: process(count)
+	begin
+		if count = "101000" then
+			DONE <= '1';
+		else 
+			DONE <= '0';
+		end if;
+	end process;
+	
+	
+	CIPHERTEXT <= d10;
+end architecture;
+	

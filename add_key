@@ -1,0 +1,35 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ADD_KEY is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		key : in std_logic_vector(127 downto 0);
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+architecture RTL of ADD_KEY is
+
+signal reg_addkey : std_logic_vector(127 downto 0);
+signal n : std_logic_vector(127 downto 0);
+
+BEGIN
+	n <= Din xor key;
+	ADD_KEY_REG: process(clk, reset, en)
+	begin
+		if reset = '1' then 
+			reg_addkey <= (others => '0');
+		elsif clk = '1' and clk' event then
+			if en = '1' then
+				reg_addkey <= n;
+			end if;
+		end if;
+	end process;
+	
+	Dout <= reg_addkey;
+end architecture;

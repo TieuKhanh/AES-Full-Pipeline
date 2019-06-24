@@ -1,0 +1,74 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.all;
+
+entity SUBBYTES is 
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+Architecture RTL of SUBBYTES is
+signal t0, t1, t2, t3, t4, t5, t6, t7 : std_logic_vector(7 downto 0);
+signal t8, t9, t10, t11, t12, t13, t14, t15 : std_logic_vector(7 downto 0);
+signal s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15: std_logic_vector(7 downto 0);
+signal concate : std_logic_vector(127 downto 0);
+
+component S_BOX is
+	port(
+		Din : in std_logic_vector(7 downto 0);
+		Dout : out std_logic_vector(7 downto 0)
+	);
+end component;
+Begin
+	t15 <= Din(127 downto 120);
+	t14 <= Din(119 downto 112);
+	t13 <= Din(111 downto 104);
+	t12 <= Din(103 downto 96);
+	t11 <= Din(95 downto 88);
+	t10 <= Din(87 downto 80);
+	t9 <= Din(79 downto 72);
+	t8 <= Din(71 downto 64);
+	t7 <= Din(63 downto 56);
+	t6 <= Din(55 downto 48);
+	t5 <= Din(47 downto 40);
+	t4 <= Din(39 downto 32);
+	t3 <= Din(31 downto 24);
+	t2 <= Din(23 downto 16);
+	t1 <= Din(15 downto 8);
+	t0 <= Din(7 downto 0);
+	
+	sb15: S_BOX port map (t15, s15);
+	sb14: S_BOX port map (t14, s14);
+	sb13: S_BOX port map (t13, s13);
+	sb12: S_BOX port map (t12, s12);
+	sb11: S_BOX port map (t11, s11);
+	sb10: S_BOX port map (t10, s10);
+	sb9: S_BOX port map (t9, s9);
+	sb8: S_BOX port map (t8, s8);
+	sb7: S_BOX port map (t7, s7);
+	sb6: S_BOX port map (t6, s6);
+	sb5: S_BOX port map (t5, s5);
+	sb4: S_BOX port map (t4, s4);
+	sb3: S_BOX port map (t3, s3);
+	sb2: S_BOX port map (t2, s2);
+	sb1: S_BOX port map (t1, s1);
+	sb0: S_BOX port map (t0, s0);
+	Srs: Process (clk, reset, en)
+	begin
+		if reset = '1' then
+			concate <= (others => '0');
+		elsif clk = '1' and clk' event then
+			if en = '1' then
+				concate <= s15 & s14 & s13 & s12 & s11 & s10 & s9 & s8 & s7 & s6 & s5 & s4 & s3 & s2 & s1 & s0;
+			end if;
+		end if;
+	end process;
+	Dout <= concate;
+end architecture;	
+	

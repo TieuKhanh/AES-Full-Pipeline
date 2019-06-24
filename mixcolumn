@@ -1,0 +1,51 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity MIXCOLUMN is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+	
+end entity;
+
+Architecture RTL of MIXCOLUMN is
+
+signal col0, col1, col2, col3 : std_logic_vector(31 downto 0);
+signal cout0, cout1, cout2, cout3 : std_logic_vector(31 downto 0);
+signal temp : std_logic_vector(127 downto 0);
+component MIXCOL is
+	port(
+		Din : in std_logic_vector(31 downto 0);
+		Dout : out std_logic_vector(31 downto 0)
+	);
+end component;
+
+Begin 
+	col3 <= Din(127 downto 96);
+	col2 <= Din(95 downto 64);
+	col1 <= Din(63 downto 32);
+	col0 <= Din(31 downto 0);
+	
+	Column3: component MIXCOL port map(col3, cout3);
+	Column2: component MIXCOL port map(col2, cout2);
+	Column1: component MIXCOL port map(col1, cout1);
+	Column0: component MIXCOL port map(col0, cout0);
+	
+	MIX: process(clk, reset, en)
+	begin 
+		if reset = '1' then
+			temp <= (others => '0');
+		elsif clk = '1' and clk' event then
+			if en = '1' then
+				temp <= cout3 & cout2 & cout1 & cout0;
+			end if;
+		end if;
+	end process;
+	
+	Dout <= temp;
+end Architecture;

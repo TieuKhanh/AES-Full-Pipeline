@@ -1,0 +1,44 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+
+entity shift_out is
+port (
+	clk : in std_logic;
+	reset : in std_logic;
+	load : in std_logic;
+	Din : in std_logic_vector (127 downto 0);
+	Dout : out std_logic_vector(31 downto 0)
+	);
+end entity;
+
+Architecture RTL of shift_out is
+signal temp: std_logic_vector(127 downto 0);
+signal tm: std_logic_vector(127 downto 0);
+Begin
+	t: process(clk, reset, load, Din)
+	begin
+		if reset = '1' then
+			tm <= (others => '0');
+		elsif clk = '1' and clk'event then
+			if load = '1' then
+				tm <= Din;
+			end if;
+		end if;
+	end process;
+	
+	t1: process (clk, reset, tm)
+	begin
+		if load = '1' then
+			temp <= tm;
+		elsif clk = '1' and clk'event then
+			temp(127 downto 32) <= temp(95 downto 0);
+			temp(31 downto 0) <= X"00000000";
+		end if;
+	end process;
+	
+	Dout <= temp(127 downto 96);
+end architecture;
+		
+			

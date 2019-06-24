@@ -1,0 +1,117 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ENC is 
+port(
+		CLK : in std_logic;
+		RESET : in std_logic;
+		ENABLE : in std_logic;
+		PLAINTEXT : in std_logic_vector(31 downto 0);
+		DONE : out std_logic;
+		CIPHERTEXT : out std_logic_vector(31 downto 0)
+	); 
+end entity;
+
+Architecture RTL of ENC is
+
+component ENCRYPTION is 
+	port(
+		CLK : in std_logic;
+		RESET : in std_logic;
+		EN : in std_logic;
+		KEY : in std_logic_vector(127 downto 0);
+		PLAINTEXT : in std_logic_vector(127 downto 0);
+		DONE : out std_logic;
+		CIPHERTEXT : out std_logic_vector(127 downto 0)
+	); 
+end component;
+
+component cnt_cn is 
+port (
+	clk : in std_logic;
+	reset : in std_logic;
+	en : in std_logic;
+	done : out std_logic
+	);
+end component;
+
+component shift_out is
+port (
+	clk : in std_logic;
+	reset : in std_logic;
+	load : in std_logic;
+	Din : in std_logic_vector (127 downto 0);
+	Dout : out std_logic_vector(31 downto 0)
+	);
+end component;
+
+component shift_in is
+port(
+	clk : in std_logic;
+	reset : in std_logic;
+	load : in std_logic;
+	Din : in std_logic_vector(31 downto 0);
+	Dout: out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component flipflop is 
+port (
+	clk : in std_logic;
+	reset : in std_logic;
+	Din : in std_logic;
+	Dout : out std_logic
+	);
+end component;
+
+signal di, d1: std_logic_vector(127 downto 0);
+signal t1, t2, t3, t4 : std_logic;
+signal cn: std_logic_vector(1 downto 0) := "00";
+signal f1, f2, f3, f4: std_logic;
+signal don: std_logic;
+signal lo: std_logic;
+
+constant Key : std_logic_vector (127 downto 0) := X"00000000000000000000000000000000";
+Begin
+
+	c: process (CLK, don, RESET)
+	begin
+		if RESET = '1' then
+			cn <= "00";
+		elsif CLK = '1' and CLK'event then
+			if don = '1' then
+				cn <= cn + '1';
+			end if;
+		end if;
+	end process;
+	
+	c1: process (cn, don)
+	begin 
+		if cn = "00" and don = '1' then
+			lo <= '1';
+		else
+			lo <= '0';
+		end if;
+	end process;
+	
+	ff1: component flipflop 
+	port map(CLK, RESET, ENABLE, f1);
+	ff2: component flipflop
+	port map(CLK, RESET, f1, f2);
+	ff3: component flipflop
+	port map(CLK, RESET, f2, f3);
+	ff4: component flipflop
+	port map(CLK, RESET, f3, f4);
+	
+	shin: component shift_in
+	port map(CLK, RESET, ENABLE, PLAINTEXT, di);
+	
+	encry: component ENCRYPTION
+	port map(CLK, RESET, f4, Key, di, don, d1);
+	
+	shout: component shift_out
+	port map(CLK, RESET, lo, d1, CIPHERTEXT);
+	DONE <= don;
+end architecture;
+

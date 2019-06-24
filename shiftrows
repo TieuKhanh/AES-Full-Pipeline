@@ -1,0 +1,52 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity SHIFTROWS is 
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+Architecture RTL of SHIFTROWS is
+
+signal r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15: std_logic_vector(7 downto 0);
+signal shiftrow: std_logic_vector(127 downto 0);
+
+BEGIN
+
+	r15 <= Din(127 downto 120);
+	r14 <= Din(119 downto 112);
+	r13 <= Din(111 downto 104);
+	r12 <= Din(103 downto 96);
+	r11 <= Din(95 downto 88);
+	r10 <= Din(87 downto 80);
+	r9 <= Din(79 downto 72);
+	r8 <= Din(71 downto 64);
+	r7 <= Din(63 downto 56);
+	r6 <= Din(55 downto 48);
+	r5 <= Din(47 downto 40);
+	r4 <= Din(39 downto 32);
+	r3 <= Din(31 downto 24);
+	r2 <= Din(23 downto 16);
+	r1 <= Din(15 downto 8);
+	r0 <= Din(7 downto 0);
+	
+	
+	Srs: Process (clk, reset, en)
+	begin
+		if reset = '1' then
+			shiftrow <= (others => '0');
+		elsif clk = '1' and clk' event then
+			if en = '1' then
+				shiftrow <= r15 & r10 & r5 & r0 & r11 & r6 & r1 & r12 & r7 & r2 & r13 & r8 & r3 & r14 & r9 & r4;
+			end if;
+		end if;
+	end process;
+	Dout <= shiftrow;
+	
+end Architecture;

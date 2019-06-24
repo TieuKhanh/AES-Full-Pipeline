@@ -1,0 +1,57 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity LAST_ROUND is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Round_key : in std_logic_vector(127 downto 0);
+		Dout_round: out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+Architecture RTL of LAST_ROUND is
+
+signal sub, shift, mix : std_logic_vector (127 downto 0);
+
+component SUBBYTES is 
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component SHIFTROWS is 
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		en : in std_logic;
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ADD_KEY is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		key : in std_logic_vector(127 downto 0);
+		Din : in std_logic_vector(127 downto 0);
+		Dout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+
+Begin 
+	
+	Subbyte: component SUBBYTES port map(clk, reset, en, Din, sub);
+	Shift_rows: component SHIFTROWS port map(clk, reset, en, sub, shift);
+	Akey: component ADD_KEY port map(clk, reset, en, Round_key, shift,Dout_round);
+end architecture;

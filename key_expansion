@@ -1,0 +1,147 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity KEY_EXPANSION is
+	port(
+		clk : in std_logic; 
+		reset : in std_logic;
+		en: in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		key_r0 : out std_logic_vector(127 downto 0);
+		key_r1 : out std_logic_vector(127 downto 0);
+		key_r2 : out std_logic_vector(127 downto 0);
+		key_r3 : out std_logic_vector(127 downto 0);
+		key_r4 : out std_logic_vector(127 downto 0);
+		key_r5 : out std_logic_vector(127 downto 0);
+		key_r6 : out std_logic_vector(127 downto 0);
+		key_r7 : out std_logic_vector(127 downto 0);
+		key_r8 : out std_logic_vector(127 downto 0);
+		key_r9 : out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+Architecture RTL of KEY_EXPANSION is
+
+signal reg0, reg1, reg2, reg3, reg4 : std_logic_vector(127 downto 0);
+signal reg5, reg6, reg7, reg8, reg9 : std_logic_vector(127 downto 0);
+
+component ROUND_KEY0 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY1 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY2 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY3 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY4 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY5 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY6 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY7 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY8 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+component ROUND_KEY9 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end component;
+
+Begin 
+
+	RK0: component ROUND_KEY0 port map (clk, reset, keyin, reg0);
+	RK1: component ROUND_KEY1 port map (clk, reset, reg0, reg1);
+	RK2: component ROUND_KEY2 port map (clk, reset, reg1, reg2);
+	RK3: component ROUND_KEY3 port map (clk, reset, reg2, reg3);
+	RK4: component ROUND_KEY4 port map (clk, reset, reg3, reg4);
+	RK5: component ROUND_KEY5 port map (clk, reset, reg4, reg5);
+	RK6: component ROUND_KEY6 port map (clk, reset, reg5, reg6);
+	RK7: component ROUND_KEY7 port map (clk, reset, reg6, reg7);
+	RK8: component ROUND_KEY8 port map (clk, reset, reg7, reg8);
+	RK9: component ROUND_KEY9 port map (clk, reset, reg8, reg9);
+	
+	
+	key_r0 <= reg0;
+	key_r1 <= reg1;
+	key_r2 <= reg2;
+	key_r3 <= reg3;
+	key_r4 <= reg4;
+	key_r5 <= reg5;
+	key_r6 <= reg6;
+	key_r7 <= reg7;
+	key_r8 <= reg8;
+	key_r9 <= reg9;
+	
+end architecture;
+
+
+	

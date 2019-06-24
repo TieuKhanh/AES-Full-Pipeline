@@ -1,0 +1,78 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity ROUND_KEY8 is
+	port(
+		clk : in std_logic;
+		reset : in std_logic;
+		keyin : in std_logic_vector(127 downto 0);
+		keyout : out std_logic_vector(127 downto 0)
+	);
+end entity;
+
+architecture RTL of ROUND_KEY8 is
+
+signal w0, w1, w2, w3 : std_logic_vector(31 downto 0); -- key in
+signal w4, w5, w6, w7 : std_logic_vector(31 downto 0); -- key out
+signal d_sb0, d_sb1, d_sb2, d_sb3 : std_logic_vector(7 downto 0);
+signal q_sb0, q_sb1, q_sb2, q_sb3 : std_logic_vector(7 downto 0);
+signal rootword : std_logic_vector(31 downto 0); 
+signal subword, xrd : std_logic_vector(31 downto 0);
+signal regin, regout : std_logic_vector(127 downto 0);
+signal round_const : std_logic_vector(7 downto 0) := X"1B";
+
+component S_BOX is
+	port(
+		Din : in std_logic_vector(7 downto 0);
+		Dout : out std_logic_vector(7 downto 0)
+	);
+end component;
+
+Begin
+	-- cach sx se ngc lai so vs tai lieu
+	w3 <= keyin(127 downto 96);
+	w2 <= keyin(95 downto 64);
+	w1 <= keyin(63 downto 32);
+	w0 <= keyin(31 downto 0);
+	
+	rootword <= w0(23 downto 0) & w0(31 downto 24); -- circular first byte
+	d_sb3 <= rootword(31 downto 24);
+	d_sb2 <= rootword(23 downto 16);
+	d_sb1 <= rootword(15 downto 8);
+	d_sb0 <= rootword(7 downto 0);
+	
+	
+	-- subbyte
+	Byte1st: component S_BOX port map (d_sb3, q_sb3);
+	Byte2nd: component S_BOX port map (d_sb2, q_sb2);
+	Byte3rd: component S_BOX port map (d_sb1, q_sb1);
+	Byte4th: component S_BOX port map (d_sb0, q_sb0);
+	
+	subword <= q_sb3 & q_sb2 & q_sb1 & q_sb0;
+	
+	-- Xoring with round oonstant A 0 0 0 => only need xor leftmost byte
+	xrd <= (subword(31 downto 24) xor round_const) & subword(23 downto 0);
+	
+	w7 <= w3 xor xrd;
+	w6 <= w2 xor w7;
+	w5 <= w1 xor w6;
+	w4 <= w0 xor w5;
+	
+	process(clk, reset)
+	begin
+		if reset = '1' then
+			regout <= (others => '0');
+		elsif clk = '1' and clk'event then
+			regout <= w7 & w6 & w5 &w4;
+		end if;
+	end process;
+	
+	keyout <= regout;
+end architecture;
+	
+	
+	
+	
+	
+	

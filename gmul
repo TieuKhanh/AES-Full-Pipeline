@@ -1,0 +1,27 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity GMUL is 
+	port(
+		Xin : in std_logic_vector(7 downto 0);
+		Yout : out std_logic_vector(7 downto 0)
+	);
+end entity;
+
+Architecture RTL of GMUL is
+
+signal tmp : std_logic_vector(7 downto 0);
+
+Begin 
+	process(Xin)
+	begin
+		if Xin(7) = '1' then
+			tmp <= (Xin(6 downto 0) & '0') xor "00011011";
+		else
+			tmp <= Xin(6 downto 0) & '0';
+		end if;
+	end process;
+	
+	Yout <= tmp;
+end Architecture;

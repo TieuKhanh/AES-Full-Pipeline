@@ -1,0 +1,45 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+
+entity cnt_cn is 
+port (
+	clk : in std_logic;
+	reset : in std_logic;
+	en : in std_logic;
+	done : out std_logic
+	);
+end entity;
+
+Architecture RTL of cnt_cn is
+signal cnt : std_logic_vector (5 downto 0) := "000000";
+signal en_t : std_logic;
+signal comp : std_logic;
+
+Begin
+	t: process(clk, reset, en_t)
+	begin
+		if reset = '1' then
+			cnt <= "000000";
+			
+		elsif clk = '1' and clk'event then
+			if en_t = '1' then
+				cnt <= cnt + '1';
+			end if;
+		end if;
+	end process;
+	
+	c: process (cnt)
+	begin
+		if cnt = "101000" then
+			comp <= '1';
+			done <= '1';
+		else
+			comp <= '0';
+			done <= '0';
+		end if;
+	end process;
+	
+	en_t <= en and not(comp);
+end architecture;
